@@ -1,4 +1,4 @@
-name: CI/CD Pipeline - Maven Build and Tomcat Deployment
+name: ci/cd pipeline deploy using maven and tomcat in different environments
 
 on:
   push:
