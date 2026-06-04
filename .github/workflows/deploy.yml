@@ -3,7 +3,7 @@ name: ci to scan with sonarqube
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
