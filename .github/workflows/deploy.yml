@@ -1,8 +1,8 @@
-name: ci to scan with sonarqube 
+name: ci to scan with sonarqube
 
 on:
   push:
-    branches: 
+    branches:
       - master
 
 jobs:
@@ -16,30 +16,30 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v5
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '17'
 
       - name: Clean project
         run: mvn clean
-			  
-      - name: Validate with maven
+
+      - name: Validate with Maven
         run: mvn validate
-			  
-      - name: Compile with maven
+
+      - name: Compile with Maven
         run: mvn compile
-  
-      - name: Test with maven
+
+      - name: Test with Maven
         run: mvn test
-			  
-      - name: Package with maven
+
+      - name: Package with Maven
         run: mvn package
-			  
-      - name: Check war file
+
+      - name: Check WAR file
         run: ls -lh target/
 
-      - name: Build, Test and SonarQube Scan
+      - name: SonarQube Scan
         run: |
-          mvn clean verify sonar:sonar \
+          mvn sonar:sonar \
             -Dsonar.projectKey=project-name \
-            -Dsonar.host.url="${{ secrets.SONAR_HOST }}" \
-            -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
+            -Dsonar.host.url=${{ secrets.SONAR_HOST }} \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
