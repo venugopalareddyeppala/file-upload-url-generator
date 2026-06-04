@@ -18,7 +18,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-
       - name: Clean project
         run: mvn clean
 
