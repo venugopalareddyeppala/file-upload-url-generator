@@ -18,6 +18,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+
       - name: Clean project
         run: mvn clean
 
@@ -39,6 +40,6 @@ jobs:
       - name: SonarQube Scan
         run: |
           mvn clean verify sonar:sonar \
-            -Dsonar.projectKey=project-name \
+            -Dsonar.projectKey=file-upload-url-generator \
             -Dsonar.host.url="${{ secrets.SONAR_HOST }}" \
             -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
