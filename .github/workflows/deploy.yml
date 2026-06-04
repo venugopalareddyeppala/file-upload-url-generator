@@ -40,6 +40,6 @@ jobs:
       - name: Build, Test and SonarQube Scan
         run: |
           mvn clean verify sonar:sonar \
-            -Dsonar.projectKey=project name \
+            -Dsonar.projectKey=project-name \
             -Dsonar.host.url="${{ secrets.SONAR_HOST }}" \
             -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
