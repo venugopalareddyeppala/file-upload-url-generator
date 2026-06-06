@@ -33,10 +33,12 @@ jobs:
             </servers>
           </settings>
           EOF
+
       - name: Build, Test and Deploy to Nexus
         run: |
           mvn clean deploy \
             -DaltDeploymentRepository=nexus::default::${{ secrets.NEXUS_URL }}
+
       - name: Verify Generated WAR
         if: success()
         run: |
