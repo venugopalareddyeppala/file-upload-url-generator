@@ -1,9 +1,9 @@
-name: ci to scan with sonarqube
+name: CI Build and Upload WAR to Nexus
 
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   deploy:
@@ -19,27 +19,25 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Clean project
-        run: mvn clean
-
-      - name: Validate with Maven
-        run: mvn validate
-
-      - name: Compile with Maven
-        run: mvn compile
-
-      - name: Test with Maven
-        run: mvn test
-
-      - name: Package with Maven
-        run: mvn package
-
-      - name: Check WAR file
-        run: ls -lh target/
-
-      - name: SonarQube Scan
+      - name: Configure Maven settings.xml for Nexus
         run: |
-          mvn clean verify sonar:sonar \
-            -Dsonar.projectKey=project-name \
-            -Dsonar.host.url="${{ secrets.SONAR_HOST }}" \
-            -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml << EOF
+          <settings>
+            <servers>
+              <server>
+                <id>nexus</id>
+                <username>${{ secrets.NEXUS_USERNAME }}</username>
+                <password>${{ secrets.NEXUS_PASSWORD }}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+      - name: Build, Test and Deploy to Nexus
+        run: |
+          mvn clean deploy \
+            -DaltDeploymentRepository=nexus::default::${{ secrets.NEXUS_URL }}
+      - name: Verify Generated WAR
+        if: success()
+        run: |
+          ls -lh target/
