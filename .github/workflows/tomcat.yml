@@ -1,0 +1,33 @@
+name: Deploy to Tomcat
+
+on:
+  workflow_run:
+    workflows:
+      - Upload to Nexus
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Build WAR File
+        run: mvn clean package
+
+      - name: Deploy to Apache Tomcat
+        run: |
+          WAR_FILE=$(find target -name "*.war" | head -n 1)
+
+          curl -u "${{ secrets.TOMCAT_USERNAME }}:${{ secrets.TOMCAT_PASSWORD }}" \
+          -T $WAR_FILE \
+          "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text/deploy?path=/file-upload-url-generator&update=true"
