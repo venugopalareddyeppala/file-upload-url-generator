@@ -24,10 +24,10 @@ jobs:
       - name: Build WAR File
         run: mvn clean package
 
-      - name: Deploy to Apache Tomcat
-        run: |
-          WAR_FILE=$(find target -name "*.war" | head -n 1)
+       - name: Deploy to Apache Tomcat
+         run: |
+              WAR_FILE=$(find target -name "*.war" | head -n 1)
 
-          curl -u "${{ secrets.TOMCAT_USERNAME }}:${{ secrets.TOMCAT_PASSWORD }}" \
-          -T $WAR_FILE \
-          "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text/deploy?path=/file-upload-url-generator&update=true"
+              curl -u "${{ secrets.TOMCAT_USERNAME }}:${{ secrets.TOMCAT_PASSWORD }}" \
+              -T "$WAR_FILE" \
+              "${{ secrets.TOMCAT_HOST }}:8080/manager/text/deploy?path=/file-upload-url-generator&update=true"e"
