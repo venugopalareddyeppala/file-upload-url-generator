@@ -1,0 +1,63 @@
+name: CI-CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  cicd:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Build Application
+        run: mvn clean package
+
+      - name: SonarQube Analysis
+        run: |
+          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar \
+          -Dsonar.projectKey=file-upload-url-generator \
+          -Dsonar.host.url=${{ secrets.SONAR_HOST }} \
+          -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+
+      - name: Configure Maven Settings
+        run: |
+          mkdir -p ~/.m2
+
+          cat > ~/.m2/settings.xml <<EOF
+          <settings>
+            <servers>
+              <server>
+                <id>nexus</id>
+                <username>${{ secrets.NEXUS_USERNAME }}</username>
+                <password>${{ secrets.NEXUS_PASSWORD }}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+
+      - name: Upload Artifact to Nexus
+        run: |
+          mvn clean deploy \
+          -DaltDeploymentRepository=nexus::default::${{ secrets.NEXUS_HOST }}/repository/maven-snapshots/
+
+      - name: Find WAR File
+        run: |
+          echo "WAR_FILE=$(find target -name '*.war' | head -n 1)" >> $GITHUB_ENV
+
+      - name: Deploy to Apache Tomcat
+        run: |
+          curl -v -u "${{ secrets.TOMCAT_USERNAME }}:${{ secrets.TOMCAT_PASSWORD }}" \
+          -T "$WAR_FILE" \
+          "${{ secrets.TOMCAT_HOST }}/manager/text/deploy?path=/file-upload-url-generator&update=true"
