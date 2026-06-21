@@ -1,0 +1,29 @@
+name: SonarQube Analysis
+
+on:
+  workflow_run:
+    workflows:
+      - Build Application
+    types:
+      - completed
+
+jobs:
+  sonar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: SonarQube Scan
+        run: |
+          mvn sonar:sonar \
+          -Dsonar.projectKey=file-upload-url-generator \
+          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+          -Dsonar.token=${{ secrets.SONAR_TOKEN }}
